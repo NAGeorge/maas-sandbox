@@ -136,7 +136,7 @@ do
     if [ -z ${MACHINE} ]
     then
         maas root machines create \
-            architecture="amd64/generic" \
+            architecture="amd64" \
             mac_addresses="0e:00:00:00:00:${NODE_NUM}" \
             hostname=node${NODE_NUM} \
             power_type=virsh power_parameters='{"power_address": "qemu+ssh://'${6}'@'${7}'/system", "power_id": "node'${NODE_NUM}'"}'
