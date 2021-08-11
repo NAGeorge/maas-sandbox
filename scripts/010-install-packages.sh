@@ -4,4 +4,5 @@ set -x
 
 echo "Installing packages"
 snap install jq
-snap install maas --channel 3.0/stable
+snap install --channel=3.0/stable maas
+snap install maas-test-db

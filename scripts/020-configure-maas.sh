@@ -14,13 +14,25 @@ set -xe
 # $10: LOCAL_IMAGE_MIRROR_URL
 
 # Initialize MAAS
+
+
 echo "Initializing MAAS..."
+if nc -z localhost 5240 ; [ $? -ne 0 ] ;
+  then
+    sudo maas init region+rack --database-uri maas-test-db:///
+  fi
+
 if ! (maas apikey --username root > /dev/null 2>&1)
 then
-    maas init --mode all --maas-url http://localhost:5240/MAAS/ \
-        --admin-username root \
-        --admin-password root \
-        --admin-email root@localhost.localdomain
+    sudo maas createadmin  --username root --password root --email "me@example.com" || echo "User root has been created."
+
+# The following is what old version did for maas 2.7
+
+#    maas init --mode all --maas-url http://localhost:5240/MAAS/ \
+#        --admin-username root \
+#        --admin-password root \
+#        --admin-email root@localhost.localdomain
+
 else
     echo "MAAS already initialized, skipping"
 fi
@@ -71,6 +83,10 @@ fi
 # Skip intro
 echo "Configuring 'completed_intro'..."
 maas root maas set-config name=completed_intro value=true
+
+#Reinitialize to fix the problem of missing rack controller.
+echo "Re-initilaize to fix problem of missing rack controller..."
+sudo maas  init region+rack --maas-url http://localhost:5240/MAAS --force
 
 # Create reserved dynamic range for OAM network (if it does not exist already)
 echo "Creating dynamic range..."
