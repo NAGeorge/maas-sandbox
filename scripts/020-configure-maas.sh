@@ -14,6 +14,8 @@ set -xe
 # $10: LOCAL_IMAGE_MIRROR_URL
 
 # Initialize MAAS
+
+
 echo "Initializing MAAS..."
 if nc -z localhost 5240 ; [ $? -ne 0 ] ;
   then
@@ -83,6 +85,17 @@ fi
 # Skip intro
 echo "Configuring 'completed_intro'..."
 maas root maas set-config name=completed_intro value=true
+
+#Reinitialize to fix the problem of missing rack controller.
+echo "Re-initilaize to fix problem of missing rack controller..."
+sudo maas init region+rack --database-uri maas-test-db:/// --maas-url http://localhost:5240/MAAS  --force 
+
+# Wait until MAAS endpoint URL is available
+while nc -z localhost 5240 ; [ $? -ne 0 ] 
+do
+    echo "MAAS endpoint URL is not available yet, waiting 10s..."
+    sleep 10
+done
 
 # Create reserved dynamic range for OAM network (if it does not exist already)
 echo "Creating dynamic range..."
