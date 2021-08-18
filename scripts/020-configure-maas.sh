@@ -15,12 +15,15 @@ set -xe
 
 # Initialize MAAS
 echo "Initializing MAAS..."
+if nc -z localhost 5240 ; [ $? -ne 0 ] ;
+  then
+    sudo maas init region+rack --database-uri maas-test-db:///
+fi
+
+# Creating root user
 if ! (maas apikey --username root > /dev/null 2>&1)
 then
-    maas init --mode all --maas-url http://localhost:5240/MAAS/ \
-        --admin-username root \
-        --admin-password root \
-        --admin-email root@localhost.localdomain
+    sudo maas createadmin  --username root --password root --email "root@localhost.localdomain"
 else
     echo "MAAS already initialized, skipping"
 fi
@@ -55,9 +58,18 @@ then
     maas root boot-source update 1 url="${10}"
 fi
 
-# Start importing images
-echo "Requesting MAAS to import images..."
-maas root boot-resources import
+
+#Reinitialize to fix the problem of missing rack controller.
+echo "Re-initilaize to fix problem of missing rack controller..."
+sudo maas init region+rack --database-uri maas-test-db:/// --maas-url http://localhost:5240/MAAS  --force
+
+
+# Wait until MAAS endpoint URL is available
+while nc -z localhost 5240 ; [ $? -ne 0 ]
+do
+    echo "MAAS endpoint URL is not available yet, waiting 10s..."
+    sleep 10
+done
 
 # Import local SSH key to MAAS, if not already imported
 echo "Importing SSH key..."
@@ -113,6 +125,11 @@ do
     echo "MAAS is still importing images, waiting 30s..."
     sleep 30
 done
+
+
+# Start importing images
+echo "Requesting MAAS to import images..."
+maas root boot-resources import
 
 # Wait until Rack Controller finishes syncing images
 echo "Waiting for Rack Controller to finish synchronizing the images "; 

@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
 
   # MAAS Server
   config.vm.define "maas", primary: true do |maas|
-    maas.vm.box = "generic/ubuntu1804"
+    maas.vm.box = "generic/ubuntu2004"
     maas.vm.hostname = "maas"
 
     # Forward MAAS GUI port for easier access
@@ -69,6 +69,10 @@ Vagrant.configure("2") do |config|
       :libvirt__dhcp_enabled => false,
       :dhcp_enabled => false,
       :autostart => true
+
+    #Fix DNS resolving issue during snap installation
+    maas.vm.provision :shell,
+      :inline => "sed -i 's/^nameserver.*$/nameserver 8.8.4.4/' /etc/resolv.conf"
 
     # Put the SSH key on MAAS node, so that it can control host's virsh to
     # manage power of Cloud Nodes.
