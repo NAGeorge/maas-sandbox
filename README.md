@@ -31,7 +31,7 @@ necessary for MAAS to be able to control power of the Cloud Nodes.
 3.  Deploy a virtual machine hosting MAAS server and virtual machines acting as 
 Cloud Nodes. Wait until Vagrant finishes provisioning.
 
-        (host)$ vagrant up --provider libvirt
+        (host)$ export HOST_IP=<your host IP address> && vagrant up --provider libvirt
     
 4.  Open web browser and login to MAAS using the following URL. Username: 
 `root`, password: `root`.
